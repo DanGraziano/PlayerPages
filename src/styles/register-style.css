@@ -1,0 +1,13 @@
+.show-password {
+  position: relative;
+}
+
+.show-password .input-group-text {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
