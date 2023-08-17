@@ -1,22 +1,49 @@
-import { Navbar, Nav, Form, FormControl, Button } from 'react-bootstrap';
-import React from "react";
+import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
+import React, {useState, useEffect} from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 
-// TODO add links and maybe add a logo instead of PlayerPage text
-// TODO add user identification and logout functionality when user logged in
+// TODO maybe add a logo instead of PlayerPage text
 
 const TopNavbar = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  /*
+// Checks authentication status with the backend
+  useEffect(() => {
+    // Replace this with your actual check for user authentication
+    const checkUserAuth = async () => {
+      const userConfirmed = await userStatusCheck();
+      setIsLoggedIn(userConfirmed);
+    };
+
+    checkUserAuth();
+  }, []);
+   */
+
   return (
-      <Navbar bg="light" expand="lg" className="px-xl-5 px-lg-5 px-md-3 px-sm-3">
+      <Navbar bg="light" expand="lg" className="px-xl-2 px-lg-2 px-md-2 px-sm-2">
         <Navbar.Brand href="#">PlayerPages</Navbar.Brand>
         <Navbar.Toggle aria-controls="navbarNav" />
         <Navbar.Collapse id="navbarNav">
           <Nav className="mr-auto">
-            <Nav.Link href="#">Home</Nav.Link>
-            <Nav.Link href="#">Profile</Nav.Link>
-            <Nav.Link href="#">Login</Nav.Link>
-            <Nav.Link href="#">Register</Nav.Link>
-            <Nav.Link href="#">Search</Nav.Link>
+            <Nav.Link href="/">Home</Nav.Link>
+            {isLoggedIn && (
+                <Nav.Link href="/profile">Profile</Nav.Link>
+            )}
+            <Nav.Link href="/search">Search</Nav.Link>
           </Nav>
+          {isLoggedIn && (
+              <Nav className="ms-auto">
+                <NavDropdown
+                    title={<FontAwesomeIcon icon={faUser} />}
+                    id="basic-nav-dropdown"
+                >
+                  <NavDropdown.Item href="#action/3.1">Edit Profile</NavDropdown.Item>
+                  <NavDropdown.Item href="#action/3.2">Logout</NavDropdown.Item>
+                </NavDropdown>
+              </Nav>
+          )}
         </Navbar.Collapse>
       </Navbar>
   );
