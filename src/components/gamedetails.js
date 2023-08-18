@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import '../styles/register-style.css';
 
 const GameDetails = () => {
   const { id } = useParams();
@@ -24,6 +25,14 @@ const GameDetails = () => {
     fetchGameDetails();
   }, [id]);
 
+  const [activeBadges, setActiveBadges] = useState({
+    Like: false,
+    Dislike: false,
+    Played: false,
+    WantToPlay: false,
+    CurrentlyPlaying: false,
+  });
+
   const handleLike = () => {
     // TODO: Handle like action
   };
@@ -33,19 +42,39 @@ const GameDetails = () => {
   };
 
   const handleAddReview = () => {
-    // TODO: Handle adding a review
+    // TODO: Handle adding review
   };
+
+  const handlePlayedList = () => {
+    // TODO: Handle adding to played list
+  };
+
+  const handleWantList = () => {
+    // TODO: Handle adding to want to play list
+  };
+
+  const handlePlayingList = () => {
+    // TODO: Handle adding to currently playing list
+  };
+
 
   if (!gameDetails) {
     return <div>Loading...</div>;
   }
-
 
   return (
       <div className="container p-0">
         <h2 className="text-uppercase text-center mb-5">{gameDetails.name}</h2>
 
         <div className="row justify-content-center">
+
+          <div className="mb-4 text-center">
+            <span className={`badge mx-2 cursor-pointer ${activeBadges.Like ? 'active-badge' : ''}`} onClick={handleLike}>Like</span>
+            <span className={`badge mx-2 cursor-pointer ${activeBadges.Dislike ? 'active-badge' : ''}`} onClick={handleDislike}>Dislike</span>
+            <span className={`badge mx-2 cursor-pointer ${activeBadges.Played ? 'active-badge' : ''}`} onClick={handlePlayedList}>Played</span>
+            <span className={`badge mx-2 cursor-pointer ${activeBadges.WantToPlay ? 'active-badge' : ''}`} onClick={handleWantList}>Want to Play</span>
+            <span className={`badge mx-2 cursor-pointer ${activeBadges.CurrentlyPlaying ? 'active-badge' : ''}`} onClick={handlePlayingList}>Currently Playing</span>
+          </div>
 
 
 
@@ -54,18 +83,6 @@ const GameDetails = () => {
               <img src={gameDetails.background_image} alt={gameDetails.name} className="card-img-top" />
             </div>
 
-            <div className="card mb-3">
-              <div className="card-header">
-                <h5 className="card-title mt-1">Add to a list </h5>
-              </div>
-              <div className="card-body text-center">
-                <button className="btn btn-outline-secondary mx-2">Like</button>
-                <button className="btn btn-outline-secondary mx-2">Dislike</button>
-                <button className="btn btn-outline-secondary mx-2">Want to Play</button>
-                <button className="btn btn-outline-secondary mx-2">Played</button>
-                <button className="btn btn-outline-secondary mx-2">Currently Playing</button>
-              </div>
-            </div>
 
             <div className="card mb-3">
               <div className="card-header">
