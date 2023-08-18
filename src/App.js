@@ -12,6 +12,7 @@ import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { Provider } from "react-redux";
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './store';
+import Settings from "./components/settings";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
                   <Route path="/register" element={<Register />} />
                   <Route path="/search" element={<Search />} />
                   <Route path="/game/:id" element={<GameDetails />} />
+                  <Route path="/settings" element={<Settings />} />
                 </Routes>
               </div>
             </div>

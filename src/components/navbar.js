@@ -38,7 +38,7 @@ const TopNavbar = () => {
                     title={<FontAwesomeIcon icon={faUser} />}
                     id="basic-nav-dropdown"
                 >
-                  <NavDropdown.Item as={Link} to="/edit-profile">Settings</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/settings">Settings</NavDropdown.Item>
                   <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
                 </NavDropdown>
               </Nav>
