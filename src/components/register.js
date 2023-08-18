@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import '../styles/register-style.css';
-import axios from 'axios';
+import {useDispatch, useSelector} from "react-redux";
+import {registerThunk} from "../services/auth-thunk";
+import {resetRegistrationSuccess} from "../reducers/auth-reducer";
 
 function Register() {
   const navigate = useNavigate();
@@ -12,48 +14,71 @@ function Register() {
   const [password, setPassword] = useState('');
   const [accountType, setAccountType] = useState('gamer');
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+ // const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const registrationSuccess = useSelector(state => state.auth.registrationSuccess);
 
-  // TODO figure out why .env file isn't working
-  const SERVER_API_URL = "http://localhost:4000/api"
-  console.log(SERVER_API_URL);
-  const USERS_URL = `${SERVER_API_URL}/users`;
+  /*
+    // TODO figure out why .env file isn't working
+    const SERVER_API_URL = "http://localhost:4000/api"
+    console.log(SERVER_API_URL);
+    const USERS_URL = `${SERVER_API_URL}/users`;
 
-  const handleRegister = async (event) => {
-    event.preventDefault(); // Prevent the default form submission behavior
+    const handleRegister = async (event) => {
+      event.preventDefault(); // Prevent the default form submission behavior
 
-    const user = {
-      email: email,
-      username: username,
-      password: password,
-      accountType: accountType
-    };
+      const user = {
+        email: email,
+        username: username,
+        password: password,
+        accountType: accountType
+      };
 
-    try {
-      const response = await axios.post(`${USERS_URL}/register`, user);
+      try {
+        const response = await axios.post(`${USERS_URL}/register`, user);
 
-      if (response.status === 200) {
-        console.log('User registered successfully', response.data);
-        setSuccessMessage('Registered Successfully! Please login to continue.');
-        // Redirect user to login page after 2 seconds
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
-      } else {
-        console.log('Error registering user', response.data);
-        setErrorMessage('Registration failed. Please try again.');
+        if (response.status === 200) {
+          console.log('User registered successfully', response.data);
+          setSuccessMessage('Registered Successfully! Please login to continue.');
+          // Redirect user to login page after 2 seconds
+          setTimeout(() => {
+            navigate('/login');
+          }, 2000);
+        } else {
+          console.log('Error registering user', response.data);
+          setErrorMessage('Registration failed. Please try again.');
+        }
+      }
+      catch (error) {
+        console.error('Error registering user', error);
+        if (error.response && error.response.data && typeof error.response.data.message === 'string') {
+          setErrorMessage(error.response.data.message);
+        } else {
+          setErrorMessage('Registration failed. Please try again.');
+        }
       }
     }
-    catch (error) {
-      console.error('Error registering user', error);
-      if (error.response && error.response.data && typeof error.response.data.message === 'string') {
-        setErrorMessage(error.response.data.message);
-      } else {
-        setErrorMessage('Registration failed. Please try again.');
-      }
+  */
+  const dispatch = useDispatch();
+  const currentUser = useSelector(state => state.auth.currentUser);
+  const errorMessage = useSelector(state => state.auth.errorMessage);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    dispatch(registerThunk({ email, password, username, accountType }));
+  };
+
+
+  useEffect(() => {
+    if (registrationSuccess) {
+      setSuccessMessage('Registration successful! Redirecting to login page...');
+      setTimeout(() => {
+        navigate('/login');
+        dispatch(resetRegistrationSuccess);
+      }, 2000);
+
     }
-  }
+  }, [registrationSuccess, navigate, dispatch]);
 
   return (
       <div className="mask d-flex align-items-center h-100">
@@ -63,7 +88,7 @@ function Register() {
             <div className="col-12 col-md-9 col-lg-7 col-xl-6">
               <div className="card">
                 <div className="card-body p-5">
-                  <form className="mb-3" onSubmit={handleRegister}>
+                  <form className="mb-3" onSubmit={handleSubmit}>
                     <h2 className="text-uppercase text-center mb-5">Create an
                       account</h2>
                     <div className="form-floating mb-3">
