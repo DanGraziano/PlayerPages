@@ -11,3 +11,19 @@
   background: transparent;
   cursor: pointer;
 }
+
+.cursor-pointer {
+  cursor: pointer;
+  background-color: #486982; /* Bootstrap primary color */
+  color: #fff; /* Text color */
+}
+
+.cursor-pointer:hover {
+  background-color: #007bff; /* Light blue color on hover */
+  color: #fff; /* Text color on hover */
+}
+
+.active-badge {
+  background-color: #00ff7f; /* Green color when active */
+  color: #fff; /* Text color when active */
+}
