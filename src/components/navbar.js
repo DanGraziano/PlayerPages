@@ -1,25 +1,13 @@
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import React, {useState, useEffect} from "react";
+import {useSelector} from "react-redux";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 // TODO maybe add a logo instead of PlayerPage text
 
 const TopNavbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  /*
-// Checks authentication status with the backend
-  useEffect(() => {
-    // Replace this with your actual check for user authentication
-    const checkUserAuth = async () => {
-      const userConfirmed = await userStatusCheck();
-      setIsLoggedIn(userConfirmed);
-    };
-
-    checkUserAuth();
-  }, []);
-   */
+  const isLoggedIn = useSelector((state) => state.auth.currentUser !== null);
 
   return (
       <Navbar bg="light" expand="lg" className="px-xl-2 px-lg-2 px-md-2 px-sm-2">

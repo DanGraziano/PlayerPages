@@ -1,16 +1,9 @@
-import React, {useState} from 'react';
-import {Nav, NavDropdown} from "react-bootstrap";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faUser} from "@fortawesome/free-solid-svg-icons";
-
-// TODO make the jumbtron dynamic
-// First one is to get users to register or login
-// Second one will welcome the user by name and display latest updates from people the follow
-
-// TODO Remove in between the HRs when user is signed in
+import React, { useState, useEffect } from 'react';
+import {useSelector} from "react-redux";
 
 const Home = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const isLoggedIn = useSelector((state) => state.auth.currentUser !== null);
+
 
   return (
       // If not logged in then show welcome message and register/login buttons
