@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import {useSelector} from "react-redux";
 
 const Profile = () => {
   const [userData, setUserData] = useState(null);
+  const currentUser = useSelector((state) => state.auth.currentUser);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+
 
   useEffect(() => {
     // Fetch the user data from your backend or state management library
@@ -28,8 +32,13 @@ const Profile = () => {
   }
 
   // TODO users who are not logged in can't follow other users
+  // TODO only the specific logged in user can see personal details
   // TODO The choose image is only for the specific logged in user on their profile page
+  // TODO add follower list of users
   // TODO clicking on the game names will take you to the game details page where you can see reviews and add to one of the three lists
+
+  // TODO added liked list of games based on one-click button in details page
+  // TODO add disliked games list based on one-click button in details page
 
   return (
       <div className="container py-5 border">
@@ -46,7 +55,7 @@ const Profile = () => {
                     src="https://pbs.twimg.com/profile_images/1044707640163618816/yCgHHS2v_200x200.jpg"
                     alt="avatar"
                     className="rounded-circle img-fluid"/>
-                <h4 className="my-3">{userData.username}'s Profile</h4>
+                <h4 className="my-3">{currentUser.username}'s Profile</h4>
                 <div className="d-flex justify-content-center mb-2">
                   <button type="button" className="btn btn-primary">Follow
                   </button>

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {useSelector} from "react-redux";
 
 const Home = () => {
-  const isLoggedIn = useSelector((state) => state.auth.currentUser !== null);
+  const currentUser = useSelector((state) => state.auth.currentUser);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
 
 
   return (
@@ -25,7 +26,7 @@ const Home = () => {
 
         {isLoggedIn && (
             <div className="jumbotron">
-              <h1 className="display-4">Welcome back, Username!</h1> {/* TODO replace with username pulled from DB */}
+              <h1 className="display-4">Welcome back, {currentUser.username}</h1>
               <hr className="my-4"/>
             </div>
         )}

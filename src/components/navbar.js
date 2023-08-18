@@ -1,25 +1,36 @@
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
-import React, {useState, useEffect} from "react";
-import {useSelector} from "react-redux";
+import {useSelector, useDispatch} from "react-redux";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
+import {useNavigate} from "react-router-dom";
+import {logoutThunk} from "../services/auth-thunk";
+import { Link } from 'react-router-dom';
 
 // TODO maybe add a logo instead of PlayerPage text
 
 const TopNavbar = () => {
-  const isLoggedIn = useSelector((state) => state.auth.currentUser !== null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+
+
+  const handleLogout = (event) => {
+    event.preventDefault();
+    dispatch(logoutThunk());
+    navigate('/login');
+  };
 
   return (
       <Navbar bg="light" expand="lg" className="px-xl-2 px-lg-2 px-md-2 px-sm-2">
-        <Navbar.Brand href="#">PlayerPages</Navbar.Brand>
+        <Navbar.Brand as={Link} to="/">PlayerPages</Navbar.Brand>
         <Navbar.Toggle aria-controls="navbarNav" />
         <Navbar.Collapse id="navbarNav">
           <Nav className="mr-auto">
-            <Nav.Link href="/">Home</Nav.Link>
+            <Nav.Link as={Link} to="/">Home</Nav.Link>
             {isLoggedIn && (
-                <Nav.Link href="/profile">Profile</Nav.Link>
+                <Nav.Link as={Link} to="/profile">Profile</Nav.Link>
             )}
-            <Nav.Link href="/search">Search</Nav.Link>
+            <Nav.Link as={Link} to="/search">Search</Nav.Link>
           </Nav>
           {isLoggedIn && (
               <Nav className="ms-auto">
@@ -27,8 +38,8 @@ const TopNavbar = () => {
                     title={<FontAwesomeIcon icon={faUser} />}
                     id="basic-nav-dropdown"
                 >
-                  <NavDropdown.Item href="#action/3.1">Edit Profile</NavDropdown.Item>
-                  <NavDropdown.Item href="#action/3.2">Logout</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} to="/edit-profile">Settings</NavDropdown.Item>
+                  <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
                 </NavDropdown>
               </Nav>
           )}

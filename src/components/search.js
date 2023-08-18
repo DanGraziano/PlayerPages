@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import {Link} from "react-router-dom";
 
+
+// TODO Map link to /search/{search criteria} or /search?criteria={search criteria} when a search has been executed and according results shown
 const Search = () => {
   const [query, setQuery] = useState('');
   const [platform, setPlatform] = useState('all');

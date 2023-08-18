@@ -5,6 +5,7 @@ import {loginThunk, profileThunk, logoutThunk, updateUserThunk,registerThunk}
 const authSlice = createSlice({
   name: "auth",
   initialState: {
+    isLoggedIn: false,
     currentUser: null,
     errorMessage: null,
     registrationSuccess: false,
@@ -23,14 +24,17 @@ const authSlice = createSlice({
       state.currentUser = payload;
       state.errorMessage = null;
       state.loginSuccess = true;
+      state.isLoggedIn = true;
     },
 
     [loginThunk.rejected]: (state, { payload, error }) => {
       state.errorMessage = payload.message;
+      state.isLoggedIn = false;
     },
 
     [logoutThunk.fulfilled]: (state) => {
       state.currentUser = null;
+      state.isLoggedIn = false;
     },
 
     [profileThunk.fulfilled]: (state, { payload }) => {
@@ -58,10 +62,12 @@ const authSlice = createSlice({
       state.currentUser = payload;
       state.registrationSuccess = true;
       state.errorMessage = '';
+      state.isLoggedIn = false;
     },
 
     [registerThunk.rejected]: (state, { payload }) => { // Add this block
       state.errorMessage = payload.message;
+      state.isLoggedIn = false;
     }
   }
 });
