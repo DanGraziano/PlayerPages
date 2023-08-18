@@ -19,6 +19,15 @@ const Profile = () => {
         followers: 100,
         following: 50,
         reviews: 20,
+        birthday: "01/01/1989",
+        firstname: "John",
+        lastname: "Doe",
+        email: "Lorem.ipsum@gmail.com",
+        bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt "
+            + "ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation "
+            + "ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit "
+            + "in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, "
+            + "sunt in culpa qui officia deserunt mollit anim id est laborum."
       };
 
       setUserData(data);
@@ -41,12 +50,11 @@ const Profile = () => {
   // TODO add disliked games list based on one-click button in details page
 
   return (
-      <div className="container py-5 border">
+      <div className="container py-4 border">
 
         <div className="row">
 
           <div className="col-lg-4">
-            <p> Left side</p>
 
             <div className="card mb-4">
               <p> Inside profile</p>
@@ -59,35 +67,48 @@ const Profile = () => {
                 <div className="d-flex justify-content-center mb-2">
                   <button type="button" className="btn btn-primary">Follow
                   </button>
-                  <button type="button"
-                          className="btn btn-outline-primary ms-1">Choose Image
-                  </button>
                 </div>
               </div>
             </div>
 
-            <p> Bottom box </p>
-            <div className="card mb-4 mb-lg-0">
+            <div className="card mt-4 mb-4 mb-lg-0">
               <div className="card-body p-0">
                 <ul className="list-group list-group-flush rounded-3">
+                  <div className="card-header">
+                    <h5 className="card-title mt-1">Private info</h5>
+                  </div>
                   <li className="list-group-item d-flex justify-content-between align-items-center p-3">
-                    <p className="mb-0 ">First name: {userData.followers}</p>
+                    <p className="mb-0 ">Name: {userData.firstname + " " + userData.lastname}</p>
                   </li>
                   <li className="list-group-item d-flex justify-content-between align-items-center p-3">
-                    <p className="mb-0">Birthday {userData.following}</p>
+                    <p className="mb-0">Birthday {userData.birthday}</p>
                   </li>
                   <li className="list-group-item d-flex justify-content-between align-items-center p-3">
-                    <p className="mb-0">Email address:: {userData.reviews}</p>
+                    <p className="mb-0">Email address:: {userData.email}</p>
                   </li>
                 </ul>
               </div>
             </div>
 
-            <p> Second Bottom box TBD </p>
-
-            <div className="card mb-4 mb-lg-0">
+            <div className="card mt-4 mb-lg-0">
               <div className="card-body p-0">
                 <ul className="list-group list-group-flush rounded-3">
+                  <div className="card-header">
+                    <h5 className="card-title mt-1">About</h5>
+                  </div>
+                  <li className="list-group-item d-flex justify-content-between align-items-center p-3">
+                    <p className="mb-0 ">{userData.bio}</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="card mb-4 mt-4 mb-lg-0">
+              <div className="card-body p-0">
+                <ul className="list-group list-group-flush rounded-3">
+                  <div className="card-header">
+                    <h5 className="card-title mt-1">Stats</h5>
+                  </div>
                   <li className="list-group-item d-flex justify-content-between align-items-center p-3">
                     <p className="mb-0 ">Followers: {userData.followers}</p>
                   </li>
@@ -107,14 +128,11 @@ const Profile = () => {
 
           <div className="col-lg-8">
 
-            <p>Right side</p>
-
-            <p>Box 1</p>
-
             <div className="card mb-4">
+              <div className="card-header">
+                <h3 className="card-title m-2">Currently Playing</h3>
+              </div>
               <div className="card-body p-4">
-                <h3 className="mb-3">Currently Playing</h3>
-                <hr className="my-4"/>
                 <p>Add game images and names here</p>
                 <ul>
                   {userData.currentlyPlaying.map((game, index) => (
@@ -125,12 +143,11 @@ const Profile = () => {
             </div>
 
 
-            <p>Box 2</p>
-
             <div className="card mb-4">
+              <div className="card-header">
+                <h3 className="card-title m-2">Want to Play</h3>
+              </div>
               <div className="card-body p-4">
-                <h3 className="mb-3">Want to play</h3>
-                <hr className="my-4"/>
                 <p>Add game images and names here</p>
                 <ul>
                   {userData.wantToPlay.map((game, index) => (
@@ -141,12 +158,11 @@ const Profile = () => {
             </div>
 
 
-            <p>Box 3</p>
-
             <div className="card mb-4">
+              <div className="card-header">
+                <h3 className="card-title m-2">Played</h3>
+              </div>
               <div className="card-body p-4">
-                <h3 className="mb-3">Played</h3>
-                <hr className="my-4"/>
                 <p>Add game images and names here</p>
                 <ul>
                   {userData.played.map((game, index) => (
