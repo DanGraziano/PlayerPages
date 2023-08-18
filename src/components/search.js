@@ -1,18 +1,60 @@
-import React, { useState } from 'react';
-import {Link} from "react-router-dom";
+import React, {useEffect, useState} from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
-
-// TODO Map link to /search/{search criteria} or /search?criteria={search criteria} when a search has been executed and according results shown
 const Search = () => {
   const [query, setQuery] = useState('');
   const [platform, setPlatform] = useState('all');
   const [genre, setGenre] = useState('all');
   const [releaseYear, setReleaseYear] = useState('all');
   const [results, setResults] = useState([]);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleSearch = async () => {
-    // TODO Handle the search process by sending a request to the RAWG API with the filters
-    // TODO Update the state with the search results
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const initialQuery = params.get('criteria');
+    if (initialQuery && initialQuery !== query) {
+      setQuery(initialQuery);
+      handleSearch(initialQuery);
+    }
+  }, [location]);
+
+  const fetchGames = async (searchQuery) => {
+   const API_KEY = "61f36cc9713248d1b63cf88756fdbacd"; //process.env.REACT_APP_RAWG_API_KEY;
+
+    // Prepare the URL for the request
+    let url = `https://api.rawg.io/api/games?key=${API_KEY}&search=${searchQuery}`;
+
+    // Add the filters to the URL
+    if (platform !== 'all') {
+      url += `platforms/lists/parents/${platform}`
+      //url += `&platforms=${platform}`;
+    }
+    if (genre !== 'all') {
+      url += `&genres=${genre}`;
+    }
+    if (releaseYear !== 'all') {
+      url += `&dates=${releaseYear}-01-01,${releaseYear}-12-31`;
+    }
+
+    try {
+      const response = await axios.get(url);
+      const games = response.data.results.map(game => ({
+        id: game.id,
+        title: game.name,
+        coverImage: game.background_image,
+      }));
+      setResults(games);
+      // Navigate to the new route with the search criteria as a query parameter
+    } catch (error) {
+      console.error('Error fetching games:', error);
+    }
+  };
+
+  const handleSearch = () => {
+    fetchGames(query);
+    navigate(`/search?criteria=${query}`);
   };
 
   return (
@@ -28,7 +70,7 @@ const Search = () => {
           />
           <div className="input-group-append">
             <button
-                className="btn btn-primary"
+                className="btn btn-primary ms-3"
                 type="button"
                 onClick={handleSearch}
             >
@@ -44,9 +86,9 @@ const Search = () => {
                 onChange={(e) => setPlatform(e.target.value)}
             >
               <option value="all">All Platforms</option>
-              <option value="ps5">PlayStation</option>
+              <option value="playstation">PlayStation</option>
               <option value="xbox">Xbox</option>
-              <option value="switch">Nintendo</option>
+              <option value="nintendo">Nintendo</option>
               <option value="pc">PC</option>
               {/* Add more options */}
             </select>
@@ -113,8 +155,7 @@ const Search = () => {
                   <div className="card h-100">
                     <img src={result.coverImage} alt={result.title} className="card-img-top" />
                     <div className="card-body">
-                      <h5 className="card-title">{result.title}</h5>
-                      <p className="card-text">Rating: {result.rating}</p>
+                      <h5 className="card-title d-flex justify-content-center mb-2">{result.title}</h5>
                     </div>
                   </div>
                 </Link>
