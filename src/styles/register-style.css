@@ -1,6 +1,11 @@
+/*
+LOGIN AND REGISTER PAGE
+ */
+
 .show-password {
   position: relative;
 }
+
 
 .show-password .input-group-text {
   position: absolute;
@@ -11,6 +16,10 @@
   background: transparent;
   cursor: pointer;
 }
+
+/*
+  GAME DETAILS PAGE
+*/
 
 .cursor-pointer {
   cursor: pointer;
@@ -25,5 +34,5 @@
 
 .active-badge {
   background-color: #00ff7f; /* Green color when active */
-  color: #fff; /* Text color when active */
+  color: #000000; /* Text color when active */
 }
