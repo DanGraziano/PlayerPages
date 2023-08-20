@@ -36,3 +36,15 @@ LOGIN AND REGISTER PAGE
   background-color: #00ff7f; /* Green color when active */
   color: #000000; /* Text color when active */
 }
+
+/*
+  GAME DETAILS PAGE
+*/
+
+.success {
+  color: green;
+}
+
+.failure {
+  color: red;
+}
