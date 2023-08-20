@@ -1,55 +1,98 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import axios from "axios";
+import '../styles/register-style.css';
+import {useNavigate} from "react-router-dom";
+
 
 const Settings = () => {
+  const navigate = useNavigate();
   const currentUser = useSelector((state) => state.auth.currentUser);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const [bio, setBio] = useState("");
+  const SERVER_API_URL = "http://localhost:4000/api" // TODO fix process.env.REACT_APP_SERVER_URL;
+  const USERS_URL = `${SERVER_API_URL}/users`;
+  const [profilePicture, setProfilePicture] = useState(null);
+  const userId = currentUser._id;
+  const [updateSuccess, setUpdateSuccess] = useState(null);
+  const [updateMessage, setUpdateMessage] = useState('');
+  const [isValid, setValid] = useState(false);
 
   const [userData, setUserData] = useState({
-    username: '',
-    email: '',
-    firstname: '',
-    lastname: '',
-    birthday: '',
+    firstName: "",
+    lastName: "",
+    birthday: "",
   });
 
-  const [profileImage, setProfileImage] = useState(null);
-
   useEffect(() => {
-    // Fetch the user data from the backend
+    // Get username and email, which can't be changed
     const fetchUserData = async () => {
-      // Replace with actual data fetching logic
-      const data = {
-        email: currentUser.email,
-        phone: currentUser.phone,
-        firstname: currentUser.firstname,
-        lastname: currentUser.lastname,
-        username: currentUser.username,
-        birthday: currentUser.birthday,
-      };
-      setUserData(data);
+      if (currentUser) {
+        const data = {
+          email: currentUser?.email,
+          username: currentUser?.username,
+        };
+        setUserData(data);
+      }
     };
 
     fetchUserData();
   }, [isLoggedIn, currentUser]);
 
-  const handleInputChange = (event) => {
-    setUserData({
-      ...userData,
-      [event.target.name]: event.target.value,
-    });
+  const validateInputs = () => {
+    const bio = document.getElementById("inputBio").value;
+    const firstName = document.getElementById("inputFirstName").value;
+    const lastName = document.getElementById("inputLastName").value;
+    const birthday = document.getElementById("inputBirthday").value;
+
+    return bio && firstName && lastName && birthday; // returns true if all fields are filled, false otherwise
   };
 
-  const handleImageChange = (event) => {
-    setProfileImage(event.target.files[0]);
+    const handleSaveChanges = async () => {
+      const bio = document.getElementById("inputBio").value;
+      const firstName = document.getElementById("inputFirstName").value;
+      const lastName = document.getElementById("inputLastName").value;
+      const birthday = document.getElementById("inputBirthday").value;
+
+      if (!bio || !firstName || !lastName || !birthday) {
+        setValid(true);
+        return;
+      } else {
+        setValid(false);
+      }
+
+    try {
+      const updateData = {
+        bio: bio,
+        firstName: firstName,
+        lastName: lastName,
+        birthday: birthday,
+      }
+
+      const response = await axios.put(`${USERS_URL}/${userId}`, updateData);
+
+      if (response.status === 200) {
+        console.log("User updated successfully");
+        setUpdateSuccess(true);
+      }
+    } catch (err) {
+      console.error("Error updating user:", err.message);
+      setUpdateSuccess(false);
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Send the updated data and profile image to your backend API
-
-    // Send user to profile page after saving
-  };
+  useEffect(() => {
+    if (updateSuccess === true) {
+      setUpdateMessage('Data update successful!');
+      setTimeout(() => {
+        navigate('/profile');
+      }, 3000);
+    } else if (updateSuccess === false) {
+      setUpdateMessage('Data update failed. Please try again.');
+    } else {
+      setUpdateMessage('');
+    }
+  }, [updateSuccess, navigate]);
 
   return (
       <div className="container p-0">
@@ -58,14 +101,13 @@ const Settings = () => {
           <div className="col-md-8 col-xl-8">
             <div className="tab-content">
               <div className="tab-pane fade show active" id="account" role="tabpanel">
-
+                <form>
                 <div className="card">
                   <div className="card-header">
                     <h5 className="card-title mb-0">Public info</h5>
                   </div>
                   <div className="card-body">
-                    <form>
-                      <div className="row">
+                    <div className="row">
                         <div className="col-md-8">
                           <div className="form-group col-md-11 mt-2">
                             <label htmlFor="inputUsername">Username</label>
@@ -73,23 +115,24 @@ const Settings = () => {
                           </div>
                           <div className="form-group col-md-11 mt-2">
                             <label htmlFor="inputAbout">About</label>
-                            <textarea rows="2" className="form-control mt-2 mb-3" id="inputBio" placeholder="Tell something about yourself"></textarea>
+                            <textarea
+                                rows="2"
+                                className="form-control mt-2 mb-3"
+                                id="inputBio"
+                                placeholder="Write something about yourself"/>
                           </div>
                         </div>
                         <div className="col-md-4">
                           <div className="text-center">
-                            <img alt="Profile Picture" src="/defaultPhoto.png" className="rounded-circle img-responsive mt-2" width="128" height="128"  onChange={handleImageChange}  />
+                            <img alt="Profile Picture" src="/defaultPhoto.png" className="rounded-circle img-responsive mt-2" width="128" height="128"  />
                             <div className="mt-2">
                               <button type="submit"
                                       className="btn btn-outline-primary ms-1">Choose Image
                               </button>
                             </div>
-                            <small>For best results, use an image at least 128px by 128px in .jpg format</small>
                           </div>
                         </div>
                       </div>
-                      <button type="submit" className="btn btn-primary">Save changes</button>
-                    </form>
                   </div>
                 </div>
 
@@ -98,15 +141,14 @@ const Settings = () => {
                     <h5 className="card-title mt-0">Private info</h5>
                   </div>
                   <div className="card-body">
-                    <form>
                       <div className="form-row">
                         <div className="form-group col-md-8 mt-2">
                           <label htmlFor="inputFirstName">First name</label>
-                          <input type="text" className="form-control mt-2 mb-3" id="inputFirstName" value={userData.firstname} placeholder="First name" onChange={handleInputChange} />
+                          <input type="text" className="form-control mt-2 mb-3" id="inputFirstName" placeholder="First name"/>
                         </div>
                         <div className="form-group col-md-8 mt-2">
                           <label htmlFor="inputLastName">Last name</label>
-                          <input type="text" className="form-control mt-2 mb-3" id="inputLastName" placeholder="Last name" value={userData.lastname} onChange={handleInputChange} />
+                          <input type="text" className="form-control mt-2 mb-3" id="inputLastName" placeholder="Last name" />
                         </div>
                       </div>
                       <div className="form-group col-md-8 mt-2">
@@ -115,19 +157,21 @@ const Settings = () => {
                             type="date"
                             className="form-control mt-2 mb-3"
                             id="inputBirthday"
-                            placeholder="Birthday"
-                            value={userData.birthday}
-                            onChange={handleInputChange}
-                        />
+                            placeholder="Birthday"/>
                       </div>
                       <div className="form-group col-md-8 mt-2">
                         <label htmlFor="inputEmail">Email</label>
                         <input disabled type="email" className="form-control mt-2 mb-3" id="inputEmail" value={userData.email} placeholder="Email" />
                       </div>
-                      <button type="submit" className="btn btn-primary mt-4">Save changes</button>
-                    </form>
+                    <div className="d-flex align-items-center mt-4">
+                      <button onClick={handleSaveChanges} type="button" className="btn btn-primary">Save changes</button>
+                      <span className={`ps-3 ${updateSuccess ? 'success' : 'failure'}`}>{updateMessage}
+                        {isValid && <p className="text-danger mt-2">All fields are required.</p>}
+                      </span>
+                    </div>
                   </div>
                 </div>
+                </form>
               </div>
             </div>
           </div>
