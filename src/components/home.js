@@ -15,7 +15,8 @@ const Home = () => {
 
   const SERVER_API_URL = "http://localhost:4000/api" // TODO fix process.env.REACT_APP_SERVER_URL;
   const GAMES_URL = `${SERVER_API_URL}/games`;
-  const REVIEWS_URL = `${SERVER_API_URL}/reviews`;
+  const RAWG_API_URL = "https://api.rawg.io/api/games";
+  const API_KEY = "61f36cc9713248d1b63cf88756fdbacd"; //process.env.REACT_APP_RAWG_API_KEY; // TODO fix env
 
   const currentUser = useSelector((state) => state.auth.currentUser);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
@@ -25,17 +26,15 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // TODO maybe organize better or call images from API
   useEffect(() => {
     const getStreamerPicks = async () => {
       try {
         const response = await axios.get(`${GAMES_URL}/latestTopPicks`);
-        console.log('Streamer picks response:', response.data); // Log the response to inspect the data
-        if (response.data.success && Array.isArray(response.data.data)) { // Ensure that response.data.data is an array
-          setStreamerPicks(response.data.data);
-        } else {
-          console.error('Expected an array, but received:', response.data);
-        }
+        const gameDetails = await Promise.all(response.data.data.map(async (pick) => {
+          const detailsResponse = await axios.get(`${RAWG_API_URL}/${pick.gameId}?key=${API_KEY}`);
+          return { ...pick, backgroundImage: detailsResponse.data.background_image };
+        }));
+        setStreamerPicks(gameDetails);
       } catch (error) {
         console.error('Error fetching streamer picks:', error);
       }
@@ -49,7 +48,16 @@ const Home = () => {
     const getRecentActivityData = async () => {
       try {
         const response = await axios.get(`${SERVER_API_URL}/recentActivityAllUsers`);
-        setRecentActivity(response.data.data);
+        const recentActivityWithImages = await Promise.all(
+            response.data.data.map(async (activity) => {
+              const gameResponse = await axios.get(
+                  `https://api.rawg.io/api/games/${activity.gameId}?key=${API_KEY}`
+              );
+              activity.backgroundImage = gameResponse.data.background_image;
+              return activity;
+            })
+        );
+        setRecentActivity(recentActivityWithImages);
         setIsLoading(false);
       } catch (err) {
         setError(err);
@@ -59,6 +67,7 @@ const Home = () => {
 
     getRecentActivityData();
   }, []);
+
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -95,22 +104,32 @@ const Home = () => {
 
         <div className="card mb-4">
           <div className="card-header">
-            <h3 className="card-title m-2">Streamer Picks</h3>
+            <h3 className="card-title m-2">Top Picks from Streamers</h3>
           </div>
           <div className="card-body p-4">
-            {streamerPicks.map((reco) => (
-                <div key={reco.id}>
-                  <p>
-                    <Link to={`/game/${reco.gameId}`}>
-                      {reco.gameName}
-                    </Link>
-                    {" - Recommended by "}
-                    {reco.username}
-                  </p>
-                </div>
-            ))}
+            <div className="row">
+              {streamerPicks.map((reco) => (
+                  <div key={reco.id} className="col-12 col-sm-6 col-md-4 mb-4">
+                    <div className="card h-100">
+                      <img className="card-img-top" src={reco.backgroundImage} alt={reco.gameName} />
+                      <div className="card-body">
+                        <h5 className="card-title">
+                          <Link to={`/game/${reco.gameId}`} className="text-decoration-none">
+                            {reco.gameName}
+                          </Link>
+                        </h5>
+                        <span className="card-text">Recommended by </span>
+                        <Link to={`/profile/${reco.username}`} className="text-decoration-none">
+                          <span className="fw-bold">{reco.username}</span>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+              ))}
+            </div>
           </div>
         </div>
+
 
         {isLoggedIn && (
             <div className="card mb-4">
@@ -118,21 +137,32 @@ const Home = () => {
                 <h3 className="card-title m-2">Latest activity</h3>
               </div>
               <div className="card-body p-4">
-                <ul>
+                <div className="row">
                   {recentActivity.map((activity, index) => (
-                      <li key={index}>
-                        <Link to={`/profile/${activity.username}`}>
-                          <span className="fw-bold">{activity.username}</span>
-                        </Link> added{' '}
-                        <Link to={`/game/${activity.gameId}`}>
-                          <em>{activity.gameName}</em>
-                        </Link> to their <span className="fw-bold">{listNames[activity.listName] || activity.listName}</span> list.
-                      </li>
+                      <div key={index} className="col-12 col-sm-6 col-md-4 mb-4">
+                        <div className="card h-100">
+                          <img className="card-img-top" src={activity.backgroundImage} alt={activity.gameName}/>
+                          <div className="card-body">
+                            <h5 className="card-title">
+                              <Link to={`/game/${activity.gameId}`} className="text-decoration-none">
+                                {activity.gameName}
+                              </Link>
+                            </h5>
+                            <p className="card-text"> Added to{" "}
+                              <span className="fw-bold"> {listNames[activity.listName] || activity.listName}</span>{" "}by{" "}
+                              <Link to={`/profile/${activity.username}`} className="text-decoration-none">
+                                <span className="fw-bold">{activity.username}</span>
+                              </Link>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                   ))}
-                </ul>
+                </div>
               </div>
             </div>
         )}
+
       </div>
   );
 }
