@@ -1,10 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import {useSelector} from "react-redux";
+import axios from "axios";
+import {Link} from "react-router-dom";
+
+const listNames = {
+  currentlyPlaying: "Currently Playing",
+  wantToPlay: "Want to Play",
+  played: "Played",
+  likeList: "Like",
+  dislikeList: "Dislike"
+};
 
 const Home = () => {
+
+  const SERVER_API_URL = "http://localhost:4000/api" // TODO fix process.env.REACT_APP_SERVER_URL;
+  const GAMES_URL = `${SERVER_API_URL}/games`;
+  const REVIEWS_URL = `${SERVER_API_URL}/reviews`;
+
   const currentUser = useSelector((state) => state.auth.currentUser);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
 
+  const [streamerPicks, setStreamerPicks] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // TODO maybe organize better or call images from API
+  useEffect(() => {
+    const getStreamerPicks = async () => {
+      try {
+        const response = await axios.get(`${GAMES_URL}/latestTopPicks`);
+        console.log('Streamer picks response:', response.data); // Log the response to inspect the data
+        if (response.data.success && Array.isArray(response.data.data)) { // Ensure that response.data.data is an array
+          setStreamerPicks(response.data.data);
+        } else {
+          console.error('Expected an array, but received:', response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching streamer picks:', error);
+      }
+    };
+
+    getStreamerPicks();
+  }, [currentUser, isLoggedIn]);
+
+
+  useEffect(() => {
+    const getRecentActivityData = async () => {
+      try {
+        const response = await axios.get(`${SERVER_API_URL}/recentActivityAllUsers`);
+        setRecentActivity(response.data.data);
+        setIsLoading(false);
+      } catch (err) {
+        setError(err);
+        setIsLoading(false);
+      }
+    };
+
+    getRecentActivityData();
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
 
   return (
       // If not logged in then show welcome message and register/login buttons
@@ -32,36 +94,46 @@ const Home = () => {
         )}
 
         <div className="card mb-4">
+          <div className="card-header">
+            <h3 className="card-title m-2">Streamer Picks</h3>
+          </div>
           <div className="card-body p-4">
-            <h2 className="mb-3">Trending Games</h2>
-            <hr className="my-4"/>
-            <p>Add game images and names here</p>
-
+            {streamerPicks.map((reco) => (
+                <div key={reco.id}>
+                  <p>
+                    <Link to={`/game/${reco.gameId}`}>
+                      {reco.gameName}
+                    </Link>
+                    {" - Recommended by "}
+                    {reco.username}
+                  </p>
+                </div>
+            ))}
           </div>
         </div>
 
-        <div className="card mb-4">
-          <div className="card-body p-4">
-            <h2 className="mb-3">Streamer Recos</h2>
-            <hr className="my-4"/>
-            <p>Add game images and names here</p>
-          </div>
-        </div>
-
-        {/* TODO figure out what "personalized content can go here */}
         {isLoggedIn && (
-        <div className="card mb-4">
-          <div className="card-body p-4">
-            <h2 className="mb-3">Latest activity or reviews</h2>
-            <hr className="my-4"/>
-            <p>Add content of people user follows</p>
-          </div>
-        </div>
+            <div className="card mb-4">
+              <div className="card-header">
+                <h3 className="card-title m-2">Latest activity</h3>
+              </div>
+              <div className="card-body p-4">
+                <ul>
+                  {recentActivity.map((activity, index) => (
+                      <li key={index}>
+                        <Link to={`/profile/${activity.username}`}>
+                          <span className="fw-bold">{activity.username}</span>
+                        </Link> added{' '}
+                        <Link to={`/game/${activity.gameId}`}>
+                          <em>{activity.gameName}</em>
+                        </Link> to their <span className="fw-bold">{listNames[activity.listName] || activity.listName}</span> list.
+                      </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
         )}
-
       </div>
-
-
   );
 }
 
