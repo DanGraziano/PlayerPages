@@ -13,10 +13,10 @@ const listNames = {
 
 const Home = () => {
 
-  const SERVER_API_URL = "http://localhost:4000/api" // TODO fix process.env.REACT_APP_SERVER_URL;
+  const SERVER_API_URL = "http://localhost:4000/api" || process.env.REACT_APP_SERVER_URL;
   const GAMES_URL = `${SERVER_API_URL}/games`;
   const RAWG_API_URL = "https://api.rawg.io/api/games";
-  const API_KEY = "61f36cc9713248d1b63cf88756fdbacd"; //process.env.REACT_APP_RAWG_API_KEY; // TODO fix env
+  const API_KEY = process.env.REACT_APP_RAWG_API_KEY;
 
   const currentUser = useSelector((state) => state.auth.currentUser);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);

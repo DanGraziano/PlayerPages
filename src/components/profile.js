@@ -26,7 +26,7 @@ const Profile = () => {
 
   const currentUser = useSelector((state) => state.auth.currentUser);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const SERVER_API_URL = "http://localhost:4000/api" // TODO fix process.env.REACT_APP_SERVER_URL;
+  const SERVER_API_URL = "http://localhost:4000/api" || process.env.REACT_APP_SERVER_URL;
   const USERS_URL = `${SERVER_API_URL}/users`;
   const userId = currentUser?._id;
   const isOwnProfile = currentUser?._id === userData._id;

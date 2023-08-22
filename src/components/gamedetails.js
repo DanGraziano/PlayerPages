@@ -17,7 +17,7 @@ const GameDetails = () => {
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn); // Use the useSelector hook to check if the user is logged in
 
   const gameId = id; // From the useParams hook
-  const SERVER_API_URL = "http://localhost:4000/api" // TODO fix process.env.REACT_APP_SERVER_URL;
+  const SERVER_API_URL = "http://localhost:4000/api" || process.env.REACT_APP_SERVER_URL;
   const GAMES_URL = `${SERVER_API_URL}/games`;
   const REVIEWS_URL = `${SERVER_API_URL}/reviews`;
   const gameName = gameDetails?.name; // Get the game name from the gameDetails state
@@ -28,16 +28,6 @@ const GameDetails = () => {
   const genre = gameDetails?.genre || 'Unavailable';
   const developer = gameDetails?.developer || 'Unavailable';
   const publisher = gameDetails?.publisher || 'Unavailable';
-
-  // TODO Debug logs remove for production
-  console.log('User ID:', userId); // Log user ID
-  console.log('Username :', username);
-  console.log('Game ID:', gameId); // Log game ID
-  console.log('Game Name:', gameName); // Log game name
-  const reduxState = useSelector((state) => state);
-  console.log('Redux state:', reduxState);
-  console.log('Current user:', currentUser);
-  console.log('Logged in?:', isLoggedIn);
 
   useEffect(() => {
     // Get the game details from the API
