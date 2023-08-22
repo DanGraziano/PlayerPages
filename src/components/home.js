@@ -83,7 +83,7 @@ const Home = () => {
         {!isLoggedIn && (
             <div className="jumbotron">
               <h1 className="display-4">Welcome to PlayerPages!</h1>
-              <p className="lead">A place to discover and discuss new and old video games alike.</p>
+              <p className="lead">A place to discover and discuss new and old video games.</p>
               <hr className="my-4"/>
               <p>Register for an account to start creating lists and writing reviews.</p>
               <p>Already have account? Login to see your feed</p>

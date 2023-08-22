@@ -17,7 +17,7 @@ import Admin from "./components/admin";
 
 function App() {
   return (
-      <div style={{backgroundColor: 'beige'}}>
+      <div style={{backgroundColor: 'gainsboro'}}>
       <Provider store={store}>
           <BrowserRouter>
             <div className="container">
