@@ -58,7 +58,7 @@ const Search = () => {
   };
 
   return (
-      <div className="search-page container py-5">
+      <div className="search-page container py-5 minHeightContainer">
         <h2 className="text-uppercase text-center mb-5">Discover New Games</h2>
         <div className="input-group mb-3">
           <input

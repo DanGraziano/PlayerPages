@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import '../styles/register-style.css';
+import React, {useEffect, useState} from 'react';
+import { useParams, Link } from 'react-router-dom';
+import '../styles/stylesheet.css';
 import { useSelector } from 'react-redux';
-
-// TODO maybe add a top pick button for streamers to add to their top picks list
+import axios from 'axios';
 
 const GameDetails = () => {
   const { id } = useParams();
@@ -30,8 +29,6 @@ const GameDetails = () => {
   const developer = gameDetails?.developer || 'Unavailable';
   const publisher = gameDetails?.publisher || 'Unavailable';
 
-
-
   // TODO Debug logs remove for production
   console.log('User ID:', userId); // Log user ID
   console.log('Username :', username);
@@ -40,70 +37,105 @@ const GameDetails = () => {
   const reduxState = useSelector((state) => state);
   console.log('Redux state:', reduxState);
   console.log('Current user:', currentUser);
-
-
+  console.log('Logged in?:', isLoggedIn);
 
   useEffect(() => {
     // Get the game details from the API
-    const fetchGameDetails = async () => {
+    const getGameDetails = async () => {
       try {
         const API_KEY = "61f36cc9713248d1b63cf88756fdbacd"; //process.env.REACT_APP_RAWG_API_KEY;
-        const response = await fetch(`https://api.rawg.io/api/games/${id}?key=${API_KEY}`);
-        const data = await response.json();
-        setGameDetails(data);
-      }
-      catch (error) {
+        const response = await axios.get(`https://api.rawg.io/api/games/${id}?key=${API_KEY}`);
+        setGameDetails(response.data); // Use response.data instead of calling .json()
+      } catch (error) {
         console.error('Error fetching game details:', error);
       }
     };
 
-    fetchGameDetails();
+    getGameDetails();
   }, [id]);
 
   useEffect(() => {
-  const fetchReviews = async () => {
-    try {
-      const response = await fetch(`${REVIEWS_URL}/game/${gameId}`);
-      const data = await response.json();
-      setReviews(data.reviews);
+    const getReviews = async () => {
+      try {
+        const response = await axios.get(`${REVIEWS_URL}/game/${gameId}`);
+        setReviews(response.data.reviews); // Use response.data instead of calling .json()
 
-      // Check whether the user has already submitted a review
-      const userReview = data.reviews.find((review) => review.userId === userId);
-      if (userReview != null) {
-        setReviewSubmitted(true);
-      } else {
-        setReviewSubmitted(false);
+        // Check whether the user has already submitted a review
+        const userReview = response.data.reviews.find((review) => review.userId === userId);
+        if (userReview != null) {
+          setReviewSubmitted(true);
+        } else {
+          setReviewSubmitted(false);
+        }
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
       }
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
+    };
+
+    getReviews();
+  }, [gameId, userId]);
+
+  const [activeBadges, setActiveBadges] = useState(null);
+
+  useEffect(() => {
+    const fetchBadgeStates = async () => {
+      try {
+        const response = await fetch(`${SERVER_API_URL}/badges/${userId}/${gameId}`);
+        const data = await response.json();
+        console.log("Response from server:", data); // Add this line
+
+        if (data.success && data.badges) {
+          setActiveBadges({
+            Like: data.badges.includes('Like'),
+            Dislike: data.badges.includes('Dislike'),
+            Played: data.badges.includes('Played'),
+            WantToPlay: data.badges.includes('WantToPlay'),
+            CurrentlyPlaying: data.badges.includes('CurrentlyPlaying'),
+            TopPick: data.badges.includes('TopPick'),
+          });
+        } else {
+          setActiveBadges({
+            Like: false,
+            Dislike: false,
+            Played: false,
+            WantToPlay: false,
+            CurrentlyPlaying: false,
+            TopPick: false,
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching badge states:', error);
+      }
+    };
+
+    if (isLoggedIn) {
+      fetchBadgeStates();
     }
-  };
-
-  fetchReviews();
-}, [gameId, userId]);
-
-  const [activeBadges, setActiveBadges] = useState({
-    Like: false,
-    Dislike: false,
-    Played: false,
-    WantToPlay: false,
-    CurrentlyPlaying: false,
-  });
+  }, [userId, gameId, isLoggedIn]);
 
 
   const handleLike = async () => {
     try {
       const action = activeBadges.Like ? 'removeLike' : 'like'; // Determine whether to like or unlike the game
 
-      const response = await fetch(`${GAMES_URL}/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, gameId, gameName })
-      });
+      const response = await axios.post(`${GAMES_URL}/${action}`, { userId, gameId, gameName });
 
-      const data = await response.json();
+      const data = response.data;
       if (data.success) {
-        setActiveBadges((prev) => ({ ...prev, Like: !prev.Like })); // Toggle the Like badge state
+        const badgeUpdates = [
+          {
+            badgeId: 'Like',
+            isEarned: !activeBadges.Like,
+          },
+        ];
+        const badgeResponse = await axios.post(`${SERVER_API_URL}/badges/${userId}/${gameId}`, badgeUpdates);
+        const badgeData = badgeResponse.data;
+
+        if (badgeData.success) {
+          setActiveBadges((prev) => ({ ...prev, Like: !prev.Like })); // Toggle the Like badge state
+        } else {
+          console.error('Error updating the badge state on the server:', badgeData.message);
+        }
       } else {
         console.error('Error toggling the like badge:', data.message);
       }
@@ -112,26 +144,36 @@ const GameDetails = () => {
     }
   };
 
+
   const handleDislike = async () => {
+    try {
     const action = activeBadges.Dislike ? 'removeDislike' : 'dislike';
 
-    try {
-      const response = await fetch(`${GAMES_URL}/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, gameId, gameName})
-      });
+    const response = await axios.post(`${GAMES_URL}/${action}`, { userId, gameId, gameName });
 
-      const data = await response.json();
-      if (data.success) {
-        setActiveBadges((prev) => ({ ...prev, Dislike: !prev.Dislike })); // toggle badge state
+    const data = response.data;
+    if (data.success) {
+      const badgeUpdates = [
+        {
+          badgeId: 'Dislike',
+          isEarned: !activeBadges.Dislike,
+        },
+      ];
+      const badgeResponse = await axios.post(`${SERVER_API_URL}/badges/${userId}/${gameId}`, badgeUpdates);
+      const badgeData = badgeResponse.data;
+
+      if (badgeData.success) {
+        setActiveBadges((prev) => ({ ...prev, Dislike: !prev.Dislike })); // Toggle the Dislike badge state
       } else {
-        console.error('Error toggling the dislike badge:', data.message);
+        console.error('Error updating the badge state on the server:', badgeData.message);
       }
-    } catch (error) {
-      console.error('Error toggling the dislike badge:', error);
+    } else {
+      console.error('Error toggling the like badge:', data.message);
     }
-  };
+  } catch (error) {
+    console.error('Error toggling the like badge:', error);
+  }
+};
 
   const handleAddReview = async () => {
     try {
@@ -156,7 +198,6 @@ const GameDetails = () => {
   };
 
   const handleRemoveReview = async () => {
-    // TODO: Handle removing review
     try {
       const response = await fetch(`${REVIEWS_URL}/removeReview`, {
         method: 'POST',
@@ -177,74 +218,131 @@ const GameDetails = () => {
   };
 
   const handlePlayedList = async () => {
-    const action = activeBadges.Played ? 'removeFromPlayedList' : 'addToPlayedList';
-
     try {
-      const response = await fetch(`${GAMES_URL}/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, gameId, gameName })
-      });
+      const action = activeBadges.Played ? 'removeFromPlayedList' : 'addToPlayedList';
 
-      const data = await response.json();
+      const response = await axios.post(`${GAMES_URL}/${action}`, { userId, gameId, gameName });
+
+      const data = response.data;
       if (data.success) {
-        setActiveBadges((prev) => ({ ...prev, Played: !prev.Played })); // toggle badge state
+        const badgeUpdates = [
+          {
+            badgeId: 'Played',
+            isEarned: !activeBadges.Played,
+          },
+        ];
+        const badgeResponse = await axios.post(`${SERVER_API_URL}/badges/${userId}/${gameId}`, badgeUpdates);
+        const badgeData = badgeResponse.data;
+
+        if (badgeData.success) {
+          setActiveBadges((prev) => ({ ...prev, Played: !prev.Played }));
+        } else {
+          console.error('Error updating the badge state on the server:', badgeData.message);
+        }
       } else {
-        console.error('Error adding to played list:', data.message);
+        console.error('Error toggling the played badge:', data.message);
       }
     } catch (error) {
-      console.error('Error adding to played list:', error);
+      console.error('Error toggling the played badge:', error);
     }
   };
 
   const handleWantList = async () => {
-    const action = activeBadges.WantToPlay ? 'removeFromWantList' : 'addToWantList';
-
     try {
-      const response = await fetch(`${GAMES_URL}/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, gameId, gameName})
-      });
+      const action = activeBadges.WantToPlay ? 'removeFromWantList' : 'addToWantList';
 
-      const data = await response.json();
+      const response = await axios.post(`${GAMES_URL}/${action}`, { userId, gameId, gameName });
+
+      const data = response.data;
       if (data.success) {
-        setActiveBadges((prev) => ({ ...prev, WantToPlay: !prev.WantToPlay })); // toggle badge state
+        const badgeUpdates = [
+          {
+            badgeId: 'WantToPlay',
+            isEarned: !activeBadges.WantToPlay,
+          },
+        ];
+        const badgeResponse = await axios.post(`${SERVER_API_URL}/badges/${userId}/${gameId}`, badgeUpdates);
+        const badgeData = badgeResponse.data;
+
+        if (badgeData.success) {
+          setActiveBadges((prev) => ({ ...prev, WantToPlay: !prev.WantToPlay }));
+        } else {
+          console.error('Error updating the badge state on the server:', badgeData.message);
+        }
       } else {
-        console.error('Error adding to want to play list:', data.message);
+        console.error('Error toggling the want to play badge:', data.message);
       }
     } catch (error) {
-      console.error('Error adding to want to play list:', error);
+      console.error('Error toggling the want to play badge:', error);
     }
   };
 
   const handlePlayingList = async () => {
-    const action = activeBadges.CurrentlyPlaying ? 'removeFromPlayingList' : 'addToPlayingList';
-
     try {
-      const response = await fetch(`${GAMES_URL}/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, gameId, gameName })
-      });
+      const action = activeBadges.CurrentlyPlaying ? 'removeFromPlayingList' : 'addToPlayingList';
+      const response = await axios.post(`${GAMES_URL}/${action}`, { userId, gameId, gameName });
 
-      const data = await response.json();
+      const data = response.data;
       if (data.success) {
-        setActiveBadges((prev) => ({ ...prev, CurrentlyPlaying: !prev.CurrentlyPlaying })); // toggle badge state
+        const badgeUpdates = [
+          {
+            badgeId: 'CurrentlyPlaying',
+            isEarned: !activeBadges.CurrentlyPlaying,
+          },
+        ];
+        const badgeResponse = await axios.post(`${SERVER_API_URL}/badges/${userId}/${gameId}`, badgeUpdates);
+        const badgeData = badgeResponse.data;
+
+        if (badgeData.success) {
+          setActiveBadges((prev) => ({ ...prev, CurrentlyPlaying: !prev.CurrentlyPlaying }));
+        } else {
+          console.error('Error updating the badge state on the server:', badgeData.message);
+        }
       } else {
-        console.error('Error adding to currently playing list:', data.message);
+        console.error('Error toggling the currently playing badge:', data.message);
       }
     } catch (error) {
-      console.error('Error adding to currently playing list:', error);
+      console.error('Error toggling the currently playing badge:', error);
     }
   };
+
+  const handleTopPick = async () => {
+    try {
+      const action = activeBadges.TopPick ? 'removeFromTopPickList' : 'addToTopPickList';
+
+      const response = await axios.post(`${GAMES_URL}/${action}`, { userId, gameId, gameName });
+
+      const data = response.data;
+      if (data.success) {
+        const badgeUpdates = [
+          {
+            badgeId: 'TopPick',
+            isEarned: !activeBadges.TopPick,
+          },
+        ];
+        const badgeResponse = await axios.post(`${SERVER_API_URL}/badges/${userId}/${gameId}`, badgeUpdates);
+        const badgeData = badgeResponse.data;
+
+        if (badgeData.success) {
+          setActiveBadges((prev) => ({ ...prev, TopPick: !prev.TopPick }));
+        } else {
+          console.error('Error updating the badge state on the server:', badgeData.message);
+        }
+      } else {
+        console.error('Error toggling the top pick badge:', data.message);
+      }
+    } catch (error) {
+      console.error('Error toggling the top pick badge:', error);
+    }
+  };
+
 
   if (!gameDetails) {
     return <div>Loading...</div>;
   }
 
   return (
-      <div className="container p-0">
+      <div className="container p-0 minHeightContainer">
         <h2 className="text-uppercase text-center mb-5">{gameDetails.name}</h2>
         <div className="row justify-content-center">
 
@@ -252,12 +350,16 @@ const GameDetails = () => {
               <>
                 {/* This section will only be visible to logged-in users */}
                 <div className="mb-4 text-center">
-                  <span className={`badge mx-2 cursor-pointer ${activeBadges.Like ? 'active-badge' : ''}`} onClick={handleLike}>Like</span>
-                  <span className={`badge mx-2 cursor-pointer ${activeBadges.Dislike ? 'active-badge' : ''}`} onClick={handleDislike}>Dislike</span>
-                  <span className={`badge mx-2 cursor-pointer ${activeBadges.Played ? 'active-badge' : ''}`} onClick={handlePlayedList}>Played</span>
-                  <span className={`badge mx-2 cursor-pointer ${activeBadges.WantToPlay ? 'active-badge' : ''}`} onClick={handleWantList}>Want to Play</span>
-                  <span className={`badge mx-2 cursor-pointer ${activeBadges.CurrentlyPlaying ? 'active-badge' : ''}`} onClick={handlePlayingList}>Currently Playing</span>
+                  <span className={`badge mx-2 cursor-pointer ${activeBadges.Like ? 'active-badge success' : 'failure'}`} onClick={handleLike}>Like</span>
+                  <span className={`badge mx-2 cursor-pointer ${activeBadges.Dislike ? 'active-badge success' : 'failure'}`} onClick={handleDislike}>Dislike</span>
+                  <span className={`badge mx-2 cursor-pointer ${activeBadges.Played ? 'active-badge success' : 'failure'}`} onClick={handlePlayedList}>Played</span>
+                  <span className={`badge mx-2 cursor-pointer ${activeBadges.WantToPlay ? 'active-badge success' : 'failure'}`} onClick={handleWantList}>Want to Play</span>
+                  <span className={`badge mx-2 cursor-pointer ${activeBadges.CurrentlyPlaying ? 'active-badge success' : 'failure'}`} onClick={handlePlayingList}>Currently Playing</span>
+                  {isLoggedIn && currentUser?.accountType === 'streamer' && (
+                      <span className={`badge mx-2 cursor-pointer ${activeBadges.TopPick ? 'active-badge success' : 'failure'}`} onClick={handleTopPick}>Top Pick</span>
+                  )}
                 </div>
+
 
                 <div className="col-lg-8">
                   <div className="card mb-3">
@@ -300,7 +402,7 @@ const GameDetails = () => {
                           </>
                       )}
                       </div>
-                      </div>
+                  </div>
 
                   <div className="card mb-3">
                     <div className="card-header">
@@ -313,7 +415,10 @@ const GameDetails = () => {
                           reviews.map((review, index) => (
                               <div key={index} className="review mb-3">
                                 <div className="d-flex justify-content-between">
-                                  <span className="fw-bold mb-1">{review.username}:</span>
+                                  <span className="fw-bold mb-1">
+                                    <Link to={`/profile/${review.username.toLowerCase()}`}>
+                                      {review.username}:
+                                    </Link></span>
                                   <span className="fst-italic">Reviewed on: {new Date(review.createdOn).toLocaleDateString()}</span>
                                 </div>
                                 <p>{review.content}</p>

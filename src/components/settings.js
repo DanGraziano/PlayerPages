@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from "axios";
-import '../styles/register-style.css';
+import '../styles/stylesheet.css';
 import {useNavigate} from "react-router-dom";
 
 
@@ -95,7 +95,7 @@ const Settings = () => {
   }, [updateSuccess, navigate]);
 
   return (
-      <div className="container p-0">
+      <div className="container p-0 minHeightContainer">
         <h2 className="text-uppercase text-center mb-5">Settings</h2>
         <div className="d-flex justify-content-center">
           <div className="col-md-8 col-xl-8">

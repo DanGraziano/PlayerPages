@@ -79,14 +79,14 @@ const Home = () => {
 
   return (
       // If not logged in then show welcome message and register/login buttons
-      <div className="home-page">
+      <div className="home-page minHeightContainer">
         {!isLoggedIn && (
             <div className="jumbotron">
               <h1 className="display-4">Welcome to PlayerPages!</h1>
-              <p className="lead">A place to discover and discuss new video games.</p>
+              <p className="lead">A place to discover and discuss new and old video games alike.</p>
               <hr className="my-4"/>
               <p>Register for an account to start creating lists and writing reviews.</p>
-              <p>Already have account? Login to see your personal feed</p>
+              <p>Already have account? Login to see your feed</p>
               <p className="lead">
                 <a className="btn btn-primary btn-lg me-3" href="/register" role="button">Register</a>
                 <a className="btn btn-primary btn-lg" href="/login" role="button">Login</a>

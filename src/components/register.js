@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import '../styles/register-style.css';
+import '../styles/stylesheet.css';
 import {useDispatch, useSelector} from "react-redux";
 import {registerThunk} from "../services/auth-thunk";
 import {resetRegistrationSuccess} from "../reducers/auth-reducer";
@@ -14,51 +14,9 @@ function Register() {
   const [password, setPassword] = useState('');
   const [accountType, setAccountType] = useState('gamer');
   const [showPassword, setShowPassword] = useState(false);
- // const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const registrationSuccess = useSelector(state => state.auth.registrationSuccess);
 
-  /*
-    // TODO figure out why .env file isn't working
-    const SERVER_API_URL = "http://localhost:4000/api"
-    console.log(SERVER_API_URL);
-    const USERS_URL = `${SERVER_API_URL}/users`;
-
-    const handleRegister = async (event) => {
-      event.preventDefault(); // Prevent the default form submission behavior
-
-      const user = {
-        email: email,
-        username: username,
-        password: password,
-        accountType: accountType
-      };
-
-      try {
-        const response = await axios.post(`${USERS_URL}/register`, user);
-
-        if (response.status === 200) {
-          console.log('User registered successfully', response.data);
-          setSuccessMessage('Registered Successfully! Please login to continue.');
-          // Redirect user to login page after 2 seconds
-          setTimeout(() => {
-            navigate('/login');
-          }, 2000);
-        } else {
-          console.log('Error registering user', response.data);
-          setErrorMessage('Registration failed. Please try again.');
-        }
-      }
-      catch (error) {
-        console.error('Error registering user', error);
-        if (error.response && error.response.data && typeof error.response.data.message === 'string') {
-          setErrorMessage(error.response.data.message);
-        } else {
-          setErrorMessage('Registration failed. Please try again.');
-        }
-      }
-    }
-  */
   const dispatch = useDispatch();
   const currentUser = useSelector(state => state.auth.currentUser);
   const errorMessage = useSelector(state => state.auth.errorMessage);
@@ -81,7 +39,7 @@ function Register() {
   }, [registrationSuccess, navigate, dispatch]);
 
   return (
-      <div className="mask d-flex align-items-center h-100">
+      <div className="mask d-flex align-items-center h-100 minHeightContainer">
         <div className="container h-100">
           <div
               className="row d-flex justify-content-center align-items-center h-100">

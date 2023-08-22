@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEye, faEyeSlash} from "@fortawesome/free-solid-svg-icons";
-import '../styles/register-style.css';
+import '../styles/stylesheet.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { loginThunk } from '../services/auth-thunk';
@@ -33,7 +33,7 @@ const Login = () => {
 
 
     return (
-        <div className="mask d-flex align-items-center h-100">
+        <div className="mask d-flex align-items-center minHeightContainer">
           <div className="container h-100">
             <div
                 className="row d-flex justify-content-center align-items-center h-100">

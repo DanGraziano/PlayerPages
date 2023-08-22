@@ -1,3 +1,20 @@
+.minHeightContainer {
+  min-height: 100vh;
+}
+
+.card {
+  background-color: beige;
+}
+
+.card-header {
+  background-color: #486982; /* Bootstrap primary color */
+  color: #fff; /* Text color */
+}
+
+.list-group-item {
+  background-color: beige;
+}
+
 /*
 LOGIN AND REGISTER PAGE
  */
@@ -45,6 +62,5 @@ LOGIN AND REGISTER PAGE
   color: green;
 }
 
-.failure {
-  color: red;
-}
+
+
